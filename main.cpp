@@ -1,24 +1,31 @@
-#include <cstdlib>
 #include <iostream>
+#include <string>
+#include <windows.h>
 
-int start_warsim() {
-    #ifdef _WIN64
-        std::cout << "Starting Warsim (win64)." << std::endl;
-        std::system("start Warsim.exe &");
-        return 0;
-    #elif _WIN32
-        std::cout << "Starting Warsim (win32)." << std::endl;
-        std::system("start Warsim.exe &");
-        return 0;
-    #elif __linux__
-        std::cout << "Startin Warsim (linux)." << std::endl;
-        std::system("wine explorer Warsim.exe &");
-        return 0;
-    #endif
-    std::cout << "Failed to start Warsim." << std::endl;
-    return 1;
+
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::string;
+
+int launchGame(const std::string &gameExecutable) {
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    string cmd = "cmd.exe /c start " + gameExecutable + " &";
+    if (!CreateProcess(NULL, const_cast<LPSTR>(cmd.c_str()), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+        cerr << "Failed to create process." << GetLastError() << endl;
+        return 1;
+    }
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return 0;
 }
 
 int main() {
-    return start_warsim();
+    string gameExecutable = "Warsim.exe";
+    return launchGame(gameExecutable);
 }

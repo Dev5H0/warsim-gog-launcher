@@ -1,1 +1,4 @@
-app/
+app/*
+build/*
+release/*
+private/
